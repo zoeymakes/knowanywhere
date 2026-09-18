@@ -1,0 +1,101 @@
+# agents/registry.yaml — 조이님 에이전트군 정의 (zoeymakes fork 확장)
+# 원칙:
+# - 로우 1개 = 에이전트 정체성 1개 (런타임/소프트웨어가 아니라 이름·역할 기준)
+# - 같은 이름이 여러 기기에서 돌아도 에이전트는 하나 (knowanywhere 원본 규칙 계승)
+# - 비밀값 금지. 경로·변수명·설정 포인터까지만.
+# - status: active | retired | migrating
+# 2026-09-19 맥미니 전체 스캔 + 조이님 확인 기준.
+
+version: 0.1
+owner: zoey
+
+agents:
+  - name: 별밤이
+    runtime: hermes
+    profile: default
+    devices: [macmini]
+    interfaces: [slack]
+    role: 큐레이터·일정·회고·지식 승격·자동화. Wiki 정본 승격 권한의 단일 주체.
+    wiki_access: read-write (정본 승격 포함)
+    status: active
+
+  - name: 돈냥이
+    runtime: hermes
+    profile: investment
+    devices: [macmini]
+    interfaces: [telegram]
+    role: Toss 실거래·포트폴리오 대시보드·투자리포트·가계부.
+    wiki_access: 자기 영역만 (투자 기록). 정본 승격 금지.
+    status: active
+    note: OpenClaw dongnyangi에서 Hermes investment 프로필로 이사 완료 (2026-09 확인).
+
+  - name: 달밤이
+    runtime: openclaw
+    profile: main
+    devices: [macmini]
+    interfaces: [slack]
+    role: OpenClaw 메인 에이전트.
+    status: active
+
+  - name: 글냥이
+    runtime: openclaw
+    profile: geulnyangi
+    devices: [macmini]
+    role: catwriter-blog 글쓰기. workspace=~/.openclaw/agents/geulnyangi/workspace/
+    status: active
+
+  - name: 아카냥
+    runtime: openclaw
+    profile: acanyang
+    devices: [macmini]
+    role: 아카냥 아카데미·TEL 콘텐츠. repo=~/.openclaw/workspace/acanyang-academy
+    status: active
+
+  - name: claude-code
+    runtime: claude-cli
+    devices: [macmini, company-mac]
+    environments: [terminal, orca]
+    role: 개발·문서·프로젝트 파일 작업. 회사맥에서는 프로젝트별 CLAUDE.md 사용.
+    status: active
+
+  - name: codex
+    runtime: codex-cli
+    devices: [macmini, company-mac]
+    environments: [terminal, orca]
+    role: 구현·검증·독립 리뷰.
+    status: active
+
+  - name: aside
+    runtime: aside-app
+    devices: [macmini, macbook, company-mac]
+    role: 브라우저 현장 작업·사용 맥락 기록. 세션·로그인·탭은 기기 로컬 유지.
+    status: active
+
+  # ---- retired ----
+  - {name: 기인냥이, runtime: openclaw, profile: giinyangi, status: retired}
+  - {name: 루티니,   runtime: openclaw, profile: routiny,   status: retired}
+  - {name: 성이,     runtime: openclaw, profile: sungyi,    status: retired}
+  - {name: 돈냥이(구), runtime: openclaw, profile: dongnyangi, status: retired, note: Hermes investment로 이사}
+
+environments:
+  - name: orca
+    kind: ADE (Agent Development Environment)
+    devices: [macmini]
+    role: CLI 에이전트 병렬 실행·worktree 격리. 에이전트 아님.
+    rule: Orca worktree에서 작업 시 작업 기록에 `머신 + worktree` 명시 (병렬 시도 구분).
+  - name: terminal
+    kind: 직접 실행 (tmux 포함)
+  - name: aside-browser
+    kind: 브라우저 실행 환경
+
+excluded:
+  - {name: cursor,   reason: 더 이상 사용 안 함 (2026-09-19 확인)}
+  - {name: continue, reason: 더 이상 사용 안 함}
+  - {name: chatgpt-app / claude-app, reason: 데스크톱 챗 도구, 에이전트 아님}
+  - {name: discord-bridge, reason: Slack(별밤이)이 동일 역할 수행. 필요 시 재검토}
+
+daemons:  # 에이전트는 아니지만 시스템 지도에 필요한 상시 자동화
+  - telegram-kakaowork-bridge
+  - toss-portfolio-dashboard
+  - lecture-delivery
+  - openclaw-dashboard
